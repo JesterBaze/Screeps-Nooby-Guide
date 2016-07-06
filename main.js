@@ -43,13 +43,23 @@ module.exports.loop = function () {
         }
     }
 
-    var towers = Game.rooms.W24S23.find(FIND_STRUCTURES, {
+    //Modify ROOMLOCATION to the room name (IE: W26N39)
+    var towers = Game.rooms.ROOMLOCATION.find(FIND_STRUCTURES, {
         filter: (s) => s.structureType == STRUCTURE_TOWER
     });
     for (let tower of towers) {
-        var target = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if (target != undefined) {
-            tower.attack(target);
+        var hostileTarget = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
+        var repairTarget = tower.pos.findClosestByRange(creep.memory.role == 'upgrader');
+        if (hostileTarget != undefined) {
+            tower.attack(hostileTarget);
+        }
+        //If no hostiles in range, look for repairable areas.
+        //Not sure if this is working? Please help?
+        else if (repairTarget != undefined){
+            var structure = tower.pos.findClosestByRange(FIND_STRUCTURES, {
+                filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL
+            });
+        tower.repair(structure);
         }
     }
 
